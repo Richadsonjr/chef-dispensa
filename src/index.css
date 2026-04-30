@@ -1,0 +1,66 @@
+@import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;0,700;1,300;1,400;1,500;1,600;1,700&family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&display=swap');
+@import "tailwindcss";
+
+@theme {
+  --font-sans: "Inter", ui-sans-serif, system-ui, sans-serif;
+  --font-serif: "Cormorant+Garamond", ui-serif, Georgia, serif;
+  
+  --color-brand-cream: #faf7f2;
+  --color-brand-glass: rgba(255, 255, 255, 0.4);
+  --color-brand-amber: #f59e0b;
+}
+
+@layer base {
+  body {
+    @apply bg-brand-cream text-slate-800 font-sans antialiased overflow-x-hidden;
+  }
+}
+
+.frosted-glass {
+  @apply backdrop-blur-md border border-white/60 bg-brand-glass shadow-sm;
+}
+
+.mesh-gradient {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  overflow: hidden;
+  pointer-events: none;
+}
+
+.mesh-amber {
+  position: absolute;
+  top: -10%;
+  left: -10%;
+  width: 50%;
+  height: 50%;
+  border-radius: 9999px;
+  background-color: rgb(254 243 199 / 0.5); /* amber-100/50 */
+  filter: blur(120px);
+}
+
+.mesh-emerald {
+  position: absolute;
+  bottom: -10%;
+  right: -10%;
+  width: 50%;
+  height: 50%;
+  border-radius: 9999px;
+  background-color: rgb(209 250 229 / 0.4); /* emerald-100/40 */
+  filter: blur(120px);
+}
+
+.mesh-orange {
+  position: absolute;
+  top: 20%;
+  right: 10%;
+  width: 30%;
+  height: 40%;
+  border-radius: 9999px;
+  background-color: rgb(255 247 237 / 0.6); /* orange-50/60 */
+  filter: blur(100px);
+}
+
+.serif {
+  font-family: theme('fontFamily.serif');
+}
