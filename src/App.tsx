@@ -68,9 +68,14 @@ export default function App() {
   const handleSearch = async () => {
     if (ingredients.length === 0) return;
     setLoading(true);
-    const ingredientNames = ingredients.map(i => i.name);
-    const results = await generateRecipe(ingredientNames, model, category, dishType);
-    setRecipes(results);
+    try {
+      const ingredientNames = ingredients.map(i => i.name);
+      const results = await generateRecipe(ingredientNames, model, category, dishType);
+      setRecipes(Array.isArray(results) ? results : (results ? [results] : []));
+    } catch (err) {
+      console.error(err);
+      setRecipes([]);
+    }
     setLoading(false);
   };
 
@@ -227,7 +232,7 @@ export default function App() {
                    <div className="h-px bg-slate-200 lg:bg-slate-100 flex-1" />
                  </h4>
                  <ul className="space-y-4 lg:space-y-6">
-                   {recipe.instructions.slice(0, 4).map((step, sIdx) => (
+                   {(recipe.instructions || []).slice(0, 4).map((step, sIdx) => (
                      <li key={sIdx} className="flex gap-4 lg:gap-5 group/item">
                        <span className="w-6 h-6 lg:w-8 lg:h-8 rounded-full bg-slate-900 text-white text-[10px] lg:text-[11px] font-black flex items-center justify-center shrink-0 mt-0.5 shadow-md lg:shadow-lg lg:group-hover/item:bg-amber-500 transition-colors">
                          {sIdx + 1}
@@ -237,9 +242,9 @@ export default function App() {
                        </p>
                      </li>
                    ))}
-                   {recipe.instructions.length > 4 && (
+                   {(recipe.instructions?.length || 0) > 4 && (
                      <p className="text-[10px] text-slate-400 font-bold ml-10 lg:ml-13 uppercase tracking-widest italic cursor-pointer hover:text-amber-500" onClick={() => setSelectedRecipe(recipe)}>
-                       + Clique para ver {recipe.instructions.length - 4} passos restantes
+                       + Clique para ver {(recipe.instructions?.length || 0) - 4} passos restantes
                      </p>
                    )}
                  </ul>
@@ -589,7 +594,7 @@ export default function App() {
                       Ingredientes
                     </h4>
                     <div className="space-y-2 lg:space-y-3">
-                      {selectedRecipe.ingredients.map((ing, i) => (
+                      {(selectedRecipe.ingredients || []).map((ing, i) => (
                         <div key={i} className="flex items-center justify-between p-3 lg:p-4 bg-slate-50 rounded-xl lg:rounded-2xl border border-slate-100 group transition-all hover:bg-white hover:shadow-md lg:hover:shadow-xl hover:shadow-slate-100">
                           <span className="text-[13px] lg:text-sm font-bold text-slate-600 capitalize pl-1">{ing.name}</span>
                           <span className="text-[11px] lg:text-xs font-black text-amber-600 bg-amber-50 px-2 lg:px-2.5 py-1 rounded-lg lg:rounded-xl ml-3 text-right">{ing.amount}</span>
@@ -620,13 +625,13 @@ export default function App() {
                     Guia de Preparo
                   </h4>
                   <div className="space-y-6 lg:space-y-8">
-                    {selectedRecipe.instructions.map((step, i) => (
+                    {(selectedRecipe.instructions || []).map((step, i) => (
                       <div key={i} className="flex gap-4 lg:gap-8 group">
                         <div className="flex flex-col items-center shrink-0">
                           <div className="w-8 h-8 lg:w-12 lg:h-12 rounded-xl lg:rounded-3xl bg-slate-900 text-white font-black flex items-center justify-center text-sm lg:text-lg shadow-md lg:shadow-xl lg:group-hover:bg-amber-500 transition-colors">
                             {i + 1}
                           </div>
-                          {i < selectedRecipe.instructions.length - 1 && (
+                          {i < (selectedRecipe.instructions?.length || 0) - 1 && (
                             <div className="w-0.5 h-full bg-slate-100 lg:bg-slate-50 mt-2 lg:mt-4 group-hover:bg-amber-100 transition-colors" />
                           )}
                         </div>

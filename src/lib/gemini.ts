@@ -75,7 +75,15 @@ Retorne uma lista de até 3 receitas em formato JSON.`;
 
     const text = response.text;
     if (!text) return [];
-    return JSON.parse(text);
+    let parsed = JSON.parse(text);
+    if (!Array.isArray(parsed)) {
+      if (parsed.recipes && Array.isArray(parsed.recipes)) {
+        parsed = parsed.recipes;
+      } else {
+        parsed = [parsed];
+      }
+    }
+    return parsed;
   } catch (error) {
     console.error("Erro ao gerar receita:", error);
     return [];
