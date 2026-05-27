@@ -17,6 +17,7 @@ export default function App() {
   const [dishType, setDishType] = useState<DishType>('todas');
   const [recipes, setRecipes] = useState<Recipe[]>([]);
   const [loading, setLoading] = useState(false);
+  const [error, setError] = useState('');
   const [selectedRecipe, setSelectedRecipe] = useState<Recipe | null>(null);
 
   const [favorites, setFavorites] = useState<Recipe[]>(() => {
@@ -68,12 +69,14 @@ export default function App() {
   const handleSearch = async () => {
     if (ingredients.length === 0) return;
     setLoading(true);
+    setError('');
     try {
       const ingredientNames = ingredients.map(i => i.name);
       const results = await generateRecipe(ingredientNames, model, category, dishType);
       setRecipes(Array.isArray(results) ? results : (results ? [results] : []));
-    } catch (err) {
+    } catch (err: any) {
       console.error(err);
+      setError(err?.message || 'Ocorreu um erro ao buscar a receita.');
       setRecipes([]);
     }
     setLoading(false);
@@ -517,6 +520,20 @@ export default function App() {
                   <div className="grid grid-cols-1 gap-6 lg:gap-8">
                     {recipes.map(renderRecipe)}
                   </div>
+                </motion.div>
+              ) : error ? (
+                <motion.div 
+                  key="error"
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  exit={{ opacity: 0 }}
+                  className="flex-1 flex flex-col items-center justify-center text-center py-20 px-4"
+                >
+                  <div className="w-24 h-24 rounded-full bg-red-50 flex items-center justify-center text-red-500 mb-6">
+                    <X className="w-12 h-12" />
+                  </div>
+                  <h3 className="text-2xl font-serif italic text-slate-800 mb-2">Ops! Algo deu errado.</h3>
+                  <p className="text-sm font-medium text-slate-500 max-w-md">{error}</p>
                 </motion.div>
               ) : (
                 <motion.div 

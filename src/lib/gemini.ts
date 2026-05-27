@@ -1,7 +1,18 @@
 import { GoogleGenAI, Type } from "@google/genai";
 import { Recipe } from "../types";
 
-const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY || '' });
+let aiClient: any = null;
+
+const getAI = () => {
+  if (!aiClient) {
+    const key = process.env.GEMINI_API_KEY || (import.meta as any).env?.VITE_GEMINI_API_KEY;
+    if (!key) {
+      throw new Error('Chave da API do Gemini não encontrada. Adicione a variável GEMINI_API_KEY nas Configurações/Secrets do projeto.');
+    }
+    aiClient = new GoogleGenAI({ apiKey: key });
+  }
+  return aiClient;
+};
 
 export const generateRecipe = async (
   ingredients: string[], 
@@ -28,6 +39,7 @@ Ingredientes disponíveis: ${ingredients.join(", ")}.
 Retorne uma lista de até 3 receitas em formato JSON.`;
 
   try {
+    const ai = getAI();
     const response = await ai.models.generateContent({
       model: "gemini-3-flash-preview",
       contents: prompt,
