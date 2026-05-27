@@ -246,14 +246,7 @@ export default function App() {
                </div>
             </div>
 
-            <div className="mt-8 pt-6 lg:mt-10 lg:pt-10 border-t border-slate-200 lg:border-slate-100 flex flex-col sm:flex-row justify-between items-center gap-4">
-              <div className="flex items-center gap-3">
-                <div className="w-8 h-8 lg:w-10 lg:h-10 rounded-xl lg:rounded-2xl bg-slate-900 flex items-center justify-center text-white font-black text-[10px] lg:text-xs shadow-lg">AI</div>
-                <div>
-                  <p className="text-[9px] lg:text-[10px] font-black text-slate-400 tracking-widest leading-none">Powered by</p>
-                  <p className="text-[10px] lg:text-xs font-black text-slate-900">Gemini 3.0 Flash</p>
-                </div>
-              </div>
+            <div className="mt-8 pt-6 lg:mt-10 lg:pt-10 border-t border-slate-200 lg:border-slate-100 flex flex-col sm:flex-row justify-end items-center gap-4">
               <button 
                 onClick={() => setSelectedRecipe(recipe)}
                 className="w-full sm:w-auto bg-amber-50 text-amber-700 px-6 py-3 lg:px-8 lg:py-3 rounded-[1rem] lg:rounded-2xl text-[10px] font-black tracking-widest uppercase hover:bg-amber-500 hover:text-white transition-all shadow-sm active:scale-95 text-center"
