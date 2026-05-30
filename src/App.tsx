@@ -378,23 +378,19 @@ export default function App() {
             </div>
 
             <div className="flex-none lg:flex-1 flex flex-wrap gap-2 content-start min-h-[80px] lg:min-h-0 lg:overflow-y-auto mb-4 lg:mb-6 pr-1 custom-scrollbar">
-              <AnimatePresence mode="popLayout">
-                {ingredients.map(ing => (
-                  <motion.span
-                    key={ing.id}
-                    layout
-                    initial={{ opacity: 0, scale: 0.8 }}
-                    animate={{ opacity: 1, scale: 1 }}
-                    exit={{ opacity: 0, scale: 0.8 }}
-                    className="px-2.5 py-1 lg:px-3 lg:py-1.5 bg-white rounded-xl text-[11px] font-bold border border-slate-100 shadow-sm flex items-center gap-1.5 lg:gap-2 group transition-all hover:border-red-100"
-                  >
-                    {ing.name}
-                    <button onClick={() => removeIngredient(ing.id)} className="text-slate-300 hover:text-red-500 transition-colors">
-                      <X className="w-3 h-3" />
-                    </button>
-                  </motion.span>
-                ))}
-              </AnimatePresence>
+              {ingredients.map(ing => (
+                <motion.span
+                  key={ing.id}
+                  initial={{ opacity: 0, scale: 0.8 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  className="px-2.5 py-1 lg:px-3 lg:py-1.5 bg-white rounded-xl text-[11px] font-bold border border-slate-100 shadow-sm flex items-center gap-1.5 lg:gap-2 group transition-all hover:border-red-100"
+                >
+                  {ing.name}
+                  <button onClick={() => removeIngredient(ing.id)} className="text-slate-300 hover:text-red-500 transition-colors">
+                    <X className="w-3 h-3" />
+                  </button>
+                </motion.span>
+              ))}
             </div>
             
             <div className="mt-auto">
@@ -474,84 +470,82 @@ export default function App() {
           )}
 
           <div className="flex-1 flex flex-col gap-6 lg:gap-10">
-            <AnimatePresence mode="wait">
-              {viewMode === 'favorites' ? (
-                <motion.div
-                  key="favorites"
-                  initial={{ opacity: 0 }}
-                  animate={{ opacity: 1 }}
-                  exit={{ opacity: 0 }}
-                  className="pb-10 lg:pb-0"
-                >
-                  {filteredFavorites.length > 0 ? (
-                    <div className="grid grid-cols-1 gap-6 lg:gap-8">
-                      {filteredFavorites.map(renderRecipe)}
-                    </div>
-                  ) : (
-                    <div className="flex-1 flex flex-col items-center justify-center text-center opacity-40 grayscale py-20">
-                      <Bookmark className="w-24 h-24 text-slate-300 mb-6" />
-                      <h3 className="text-2xl font-serif italic text-slate-400">
-                        {favSearchQuery ? 'Nenhuma receita encontrada.' : 'Nenhuma receita favorita.'}
-                      </h3>
-                    </div>
-                  )}
-                </motion.div>
-              ) : loading ? (
-                <motion.div 
-                  key="loading"
-                  initial={{ opacity: 0 }}
-                  animate={{ opacity: 1 }}
-                  exit={{ opacity: 0 }}
-                  className="flex-1 flex flex-col items-center justify-center text-center p-12"
-                >
-                  <div className="relative">
-                    <div className="w-32 h-32 rounded-full border-4 border-amber-500/20 border-t-amber-500 animate-spin mb-8" />
-                    <ChefHat className="w-12 h-12 text-amber-500 absolute top-10 left-10 animate-bounce" />
-                  </div>
-                  <h3 className="text-2xl font-serif italic text-slate-400">O Chef está combinando sabores...</h3>
-                </motion.div>
-              ) : recipes.length > 0 ? (
-                <motion.div
-                  key="results"
-                  initial={{ opacity: 0 }}
-                  animate={{ opacity: 1 }}
-                  exit={{ opacity: 0 }}
-                  className="pb-10 lg:pb-0"
-                >
+            {viewMode === 'favorites' ? (
+              <motion.div
+                key="favorites"
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+                className="pb-10 lg:pb-0"
+              >
+                {filteredFavorites.length > 0 ? (
                   <div className="grid grid-cols-1 gap-6 lg:gap-8">
-                    {recipes.map(renderRecipe)}
+                    {filteredFavorites.map(renderRecipe)}
                   </div>
-                </motion.div>
-              ) : error ? (
-                <motion.div 
-                  key="error"
-                  initial={{ opacity: 0 }}
-                  animate={{ opacity: 1 }}
-                  exit={{ opacity: 0 }}
-                  className="flex-1 flex flex-col items-center justify-center text-center py-20 px-4"
-                >
-                  <div className="w-24 h-24 rounded-full bg-red-50 flex items-center justify-center text-red-500 mb-6">
-                    <X className="w-12 h-12" />
+                ) : (
+                  <div className="flex-1 flex flex-col items-center justify-center text-center opacity-40 grayscale py-20">
+                    <Bookmark className="w-24 h-24 text-slate-300 mb-6" />
+                    <h3 className="text-2xl font-serif italic text-slate-400">
+                      {favSearchQuery ? 'Nenhuma receita encontrada.' : 'Nenhuma receita favorita.'}
+                    </h3>
                   </div>
-                  <h3 className="text-2xl font-serif italic text-slate-800 mb-2">Ops! Algo deu errado.</h3>
-                  <p className="text-sm font-medium text-slate-500 max-w-md">{error}</p>
-                </motion.div>
-              ) : (
-                <motion.div 
-                  key="empty"
-                  initial={{ opacity: 0 }}
-                  animate={{ opacity: 1 }}
-                  exit={{ opacity: 0 }}
-                  className="flex-1 flex flex-col items-center justify-center text-center opacity-40 grayscale py-20"
-                >
-                  <div className="relative mb-10">
-                    <Utensils className="w-32 h-32 text-slate-200" />
-                    <div className="absolute inset-x-0 bottom-0 h-4 bg-amber-500/10 blur-xl rounded-full" />
-                  </div>
-                  <h3 className="text-3xl font-serif italic text-slate-300">Escolha os itens da dispensa e filtros desejados.</h3>
-                </motion.div>
-              )}
-            </AnimatePresence>
+                )}
+              </motion.div>
+            ) : loading ? (
+              <motion.div 
+                key="loading"
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+                className="flex-1 flex flex-col items-center justify-center text-center p-12"
+              >
+                <div className="relative">
+                  <div className="w-32 h-32 rounded-full border-4 border-amber-500/20 border-t-amber-500 animate-spin mb-8" />
+                  <ChefHat className="w-12 h-12 text-amber-500 absolute top-10 left-10 animate-bounce" />
+                </div>
+                <h3 className="text-2xl font-serif italic text-slate-400">O Chef está combinando sabores...</h3>
+              </motion.div>
+            ) : recipes.length > 0 ? (
+              <motion.div
+                key="results"
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+                className="pb-10 lg:pb-0"
+              >
+                <div className="grid grid-cols-1 gap-6 lg:gap-8">
+                  {recipes.map(renderRecipe)}
+                </div>
+              </motion.div>
+            ) : error ? (
+              <motion.div 
+                key="error"
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+                className="flex-1 flex flex-col items-center justify-center text-center py-20 px-4"
+              >
+                <div className="w-24 h-24 rounded-full bg-red-50 flex items-center justify-center text-red-500 mb-6">
+                  <X className="w-12 h-12" />
+                </div>
+                <h3 className="text-2xl font-serif italic text-slate-800 mb-2">Ops! Algo deu errado.</h3>
+                <p className="text-sm font-medium text-slate-500 max-w-md">{error}</p>
+              </motion.div>
+            ) : (
+              <motion.div 
+                key="empty"
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+                className="flex-1 flex flex-col items-center justify-center text-center opacity-40 grayscale py-20"
+              >
+                <div className="relative mb-10">
+                  <Utensils className="w-32 h-32 text-slate-200" />
+                  <div className="absolute inset-x-0 bottom-0 h-4 bg-amber-500/10 blur-xl rounded-full" />
+                </div>
+                <h3 className="text-3xl font-serif italic text-slate-300">Escolha os itens da dispensa e filtros desejados.</h3>
+              </motion.div>
+            )}
           </div>
         </main>
       </div>
