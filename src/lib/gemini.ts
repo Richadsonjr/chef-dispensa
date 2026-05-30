@@ -1,17 +1,18 @@
-import { GoogleGenAI, Type } from "@google/genai";
 import { Recipe } from "../types";
 
-let aiClient: any = null;
+const getAPIKey = (): string => {
+  const envKey = (import.meta as any).env?.VITE_OPENROUTER_API_KEY;
+  if (envKey) return envKey;
 
-const getAI = () => {
-  if (!aiClient) {
-    const key = process.env.GEMINI_API_KEY || (import.meta as any).env?.VITE_GEMINI_API_KEY;
-    if (!key) {
-      throw new Error('Chave da API do Gemini não encontrada. Adicione a variável GEMINI_API_KEY nas Configurações/Secrets do projeto.');
+  try {
+    if (process.env.OPENROUTER_API_KEY) {
+      return process.env.OPENROUTER_API_KEY;
     }
-    aiClient = new GoogleGenAI({ apiKey: key });
+  } catch (e) {
+    // ignorar em ambientes de navegador onde process não está definido
   }
-  return aiClient;
+
+  return "";
 };
 
 export const generateRecipe = async (
@@ -36,68 +37,142 @@ Importante: Identifique a origem cultural da receita (País e Região, se possí
 
 Ingredientes disponíveis: ${ingredients.join(", ")}.
 
-Retorne uma lista de até 3 receitas em formato JSON.`;
+Retorne uma lista de até 3 receitas em formato JSON.
+O JSON deve ser um array de objetos (ou um objeto contendo a propriedade "recipes" que é um array) onde cada objeto tem a seguinte estrutura exata:
+{
+  "title": "Nome do prato",
+  "description": "Breve descrição",
+  "category": "doce" ou "salgado",
+  "type": "tipo de prato (ex: bolo, torta)",
+  "prepTime": "tempo de preparo (ex: 45 min)",
+  "origin": {
+    "country": "país de origem",
+    "region": "região de origem se aplicável"
+  },
+  "ingredients": [
+    { "name": "nome do ingrediente", "amount": "quantidade" }
+  ],
+  "instructions": [
+    "Passo 1...",
+    "Passo 2..."
+  ]
+}
 
-  try {
-    const ai = getAI();
-    const response = await ai.models.generateContent({
-      model: "gemini-3-flash-preview",
-      contents: prompt,
-      config: {
-        responseMimeType: "application/json",
-        responseSchema: {
-          type: Type.ARRAY,
-          items: {
-            type: Type.OBJECT,
-            properties: {
-              title: { type: Type.STRING },
-              description: { type: Type.STRING },
-              category: { type: Type.STRING, enum: ['doce', 'salgado'] },
-              type: { type: Type.STRING },
-              ingredients: {
-                type: Type.ARRAY,
-                items: {
-                  type: Type.OBJECT,
-                  properties: {
-                    name: { type: Type.STRING },
-                    amount: { type: Type.STRING }
-                  },
-                  required: ['name', 'amount']
-                }
-              },
-              instructions: {
-                type: Type.ARRAY,
-                items: { type: Type.STRING }
-              },
-              prepTime: { type: Type.STRING },
-              origin: {
-                type: Type.OBJECT,
-                properties: {
-                  country: { type: Type.STRING },
-                  region: { type: Type.STRING }
-                },
-                required: ['country']
-              }
-            },
-            required: ['title', 'description', 'category', 'type', 'ingredients', 'instructions', 'prepTime', 'origin']
-          }
+Responda APENAS com o JSON válido, sem qualquer bloco de código markdown, markdown tags ou texto adicional.`;
+
+  const modelsToTry = [
+    "openai/gpt-oss-120b:free",
+    "qwen/qwen3-next-80b-a3b-instruct:free",
+    "deepseek/deepseek-v4-flash:free",
+    "openai/gpt-oss-120b:free",
+    "nvidia/nemotron-3-nano-30b-a3b:free",
+    "google/gemma-4-31b-it:free",
+    "openai/gpt-oss-20b:free"
+  ];
+
+  const apiKey = getAPIKey();
+  if (!apiKey) {
+    throw new Error("Chave de API do OpenRouter não encontrada. Por favor, adicione a variável VITE_OPENROUTER_API_KEY nos Secrets do seu repositório GitHub (para o GitHub Pages) ou nas Configurações da plataforma.");
+  }
+
+  for (let i = 0; i < modelsToTry.length; i++) {
+    const currentModel = modelsToTry[i];
+    console.log(`[OpenRouter] Tentando gerar receita com o modelo: ${currentModel} (Tentativa ${i + 1}/${modelsToTry.length})`);
+    
+    try {
+      const url = "https://openrouter.ai/api/v1/chat/completions";
+      const response = await fetch(url, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": `Bearer ${apiKey}`,
+          "HTTP-Referer": typeof window !== "undefined" ? window.location.origin : "https://github.com",
+          "X-Title": "BakeMind"
+        },
+        body: JSON.stringify({
+          model: currentModel,
+          messages: [
+            {
+              role: "user",
+              content: prompt
+            }
+          ]
+        })
+      });
+
+      if (!response.ok) {
+        throw new Error(`HTTP Error ${response.status}: ${response.statusText}`);
+      }
+
+      const data = await response.json();
+      if (data.error) {
+        throw new Error(`OpenRouter Error: ${data.error.message || JSON.stringify(data.error)}`);
+      }
+
+      const content = data.choices?.[0]?.message?.content;
+      if (!content) {
+        throw new Error("Resposta de conteúdo vazia.");
+      }
+
+      let parsed = cleanAndParseJSON(content);
+      if (!Array.isArray(parsed)) {
+        if (parsed.recipes && Array.isArray(parsed.recipes)) {
+          parsed = parsed.recipes;
+        } else {
+          parsed = [parsed];
         }
       }
-    });
+      
+      console.log(`[OpenRouter] Sucesso ao gerar com o modelo: ${currentModel}`);
+      return parsed;
 
-    const text = response.text;
-    if (!text) return [];
-    let parsed = JSON.parse(text);
-    if (!Array.isArray(parsed)) {
-      if (parsed.recipes && Array.isArray(parsed.recipes)) {
-        parsed = parsed.recipes;
-      } else {
-        parsed = [parsed];
-      }
+    } catch (error: any) {
+      console.warn(`[OpenRouter] Falha no modelo ${currentModel}:`, error);
     }
-    return parsed;
-  } catch (error) {
-    console.error("Erro ao gerar receita:", error);
-    return [];
   }
+
+  // Se todos falharem:
+  throw new Error(
+    "Por favor, volte mais tarde. Todos os modelos gratuitos de Inteligência Artificial estão temporariamente instáveis ou esgotaram seus limites de requisições."
+  );
 };
+
+function cleanAndParseJSON(text: string): any {
+  let cleaned = text.trim();
+  
+  // Se contiver delimitadores markdown de código, extrai o conteúdo de dentro deles
+  if (cleaned.includes("```")) {
+    const match = cleaned.match(/```(?:json)?\s*([\s\S]*?)\s*```/);
+    if (match && match[1]) {
+      cleaned = match[1].trim();
+    }
+  }
+  
+  // Tratamento adicional para remover textos residuais antes/depois do JSON
+  const firstBrace = cleaned.indexOf("{");
+  const firstBracket = cleaned.indexOf("[");
+  const lastBrace = cleaned.lastIndexOf("}");
+  const lastBracket = cleaned.lastIndexOf("]");
+  
+  let startIndex = -1;
+  let endIndex = -1;
+  
+  if (firstBrace !== -1 && (firstBracket === -1 || firstBrace < firstBracket)) {
+    startIndex = firstBrace;
+    endIndex = lastBrace;
+  } else if (firstBracket !== -1) {
+    startIndex = firstBracket;
+    endIndex = lastBracket;
+  }
+  
+  if (startIndex !== -1 && endIndex !== -1 && endIndex > startIndex) {
+    cleaned = cleaned.substring(startIndex, endIndex + 1);
+  }
+
+  try {
+    return JSON.parse(cleaned);
+  } catch (error) {
+    console.error("Erro ao analisar JSON retornado:", cleaned);
+    throw error;
+  }
+}
