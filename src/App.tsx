@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { 
   Plus, X, Utensils, ChefHat, Timer, BookOpen, Sparkles, Brain, Cpu, Search, 
@@ -15,6 +15,8 @@ export default function App() {
   const [model] = useState<AIModel>('gemini');
   const [category, setCategory] = useState<Category>('ambos');
   const [dishType, setDishType] = useState<DishType>('todas');
+  const [isBaby, setIsBaby] = useState(false);
+  const [babyAge, setBabyAge] = useState('6-12 meses');
   const [recipes, setRecipes] = useState<Recipe[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
@@ -72,7 +74,7 @@ export default function App() {
     setError('');
     try {
       const ingredientNames = ingredients.map(i => i.name);
-      const results = await generateRecipe(ingredientNames, model, category, dishType);
+      const results = await generateRecipe(ingredientNames, model, category, dishType, isBaby, babyAge);
       setRecipes(Array.isArray(results) ? results : (results ? [results] : []));
     } catch (err: any) {
       console.error(err);
@@ -350,6 +352,35 @@ export default function App() {
                   </div>
                 </div>
               </div>
+
+              <div className="border-t border-slate-200/50 pt-4">
+                <label className="flex items-center gap-2 cursor-pointer group select-none">
+                  <input
+                    type="checkbox"
+                    checked={isBaby}
+                    onChange={(e) => setIsBaby(e.target.checked)}
+                    className="w-4 h-4 rounded text-amber-500 focus:ring-amber-500 border-slate-300 transition-colors cursor-pointer accent-amber-500"
+                  />
+                  <span className="text-[12px] font-bold text-slate-700 group-hover:text-amber-600 transition-colors">
+                    Receita para Bebê? 👶
+                  </span>
+                </label>
+
+                {isBaby && (
+                  <div className="mt-3 animate-fade-in">
+                    <span className="text-[10px] font-bold text-slate-400 uppercase mb-1.5 block">Faixa Etária</span>
+                    <select
+                      value={babyAge}
+                      onChange={(e) => setBabyAge(e.target.value)}
+                      className="w-full bg-white/65 border border-white px-3 py-2.5 rounded-xl text-xs font-semibold focus:outline-none focus:ring-2 focus:ring-amber-500/50 appearance-none transition-all cursor-pointer"
+                    >
+                      <option value="6-12 meses">6 a 12 meses (Introdução / Papinhas)</option>
+                      <option value="12-24 meses">12 a 24 meses (Amassadinhos)</option>
+                      <option value="2 anos ou mais">A partir de 2 anos (Geral Macio)</option>
+                    </select>
+                  </div>
+                )}
+              </div>
             </div>
           </div>
 
@@ -471,13 +502,7 @@ export default function App() {
 
           <div className="flex-1 flex flex-col gap-6 lg:gap-10">
             {viewMode === 'favorites' ? (
-              <motion.div
-                key="favorites"
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                exit={{ opacity: 0 }}
-                className="pb-10 lg:pb-0"
-              >
+              <div className="pb-10 lg:pb-0 animate-fade-in">
                 {filteredFavorites.length > 0 ? (
                   <div className="grid grid-cols-1 gap-6 lg:gap-8">
                     {filteredFavorites.map(renderRecipe)}
@@ -490,61 +515,37 @@ export default function App() {
                     </h3>
                   </div>
                 )}
-              </motion.div>
+              </div>
             ) : loading ? (
-              <motion.div 
-                key="loading"
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                exit={{ opacity: 0 }}
-                className="flex-1 flex flex-col items-center justify-center text-center p-12"
-              >
+              <div className="flex-1 flex flex-col items-center justify-center text-center p-12 animate-fade-in">
                 <div className="relative">
                   <div className="w-32 h-32 rounded-full border-4 border-amber-500/20 border-t-amber-500 animate-spin mb-8" />
                   <ChefHat className="w-12 h-12 text-amber-500 absolute top-10 left-10 animate-bounce" />
                 </div>
                 <h3 className="text-2xl font-serif italic text-slate-400">O Chef está combinando sabores...</h3>
-              </motion.div>
+              </div>
             ) : recipes.length > 0 ? (
-              <motion.div
-                key="results"
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                exit={{ opacity: 0 }}
-                className="pb-10 lg:pb-0"
-              >
+              <div className="pb-10 lg:pb-0 animate-fade-in">
                 <div className="grid grid-cols-1 gap-6 lg:gap-8">
                   {recipes.map(renderRecipe)}
                 </div>
-              </motion.div>
+              </div>
             ) : error ? (
-              <motion.div 
-                key="error"
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                exit={{ opacity: 0 }}
-                className="flex-1 flex flex-col items-center justify-center text-center py-20 px-4"
-              >
+              <div className="flex-1 flex flex-col items-center justify-center text-center py-20 px-4 animate-fade-in">
                 <div className="w-24 h-24 rounded-full bg-red-50 flex items-center justify-center text-red-500 mb-6">
                   <X className="w-12 h-12" />
                 </div>
                 <h3 className="text-2xl font-serif italic text-slate-800 mb-2">Ops! Algo deu errado.</h3>
                 <p className="text-sm font-medium text-slate-500 max-w-md">{error}</p>
-              </motion.div>
+              </div>
             ) : (
-              <motion.div 
-                key="empty"
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                exit={{ opacity: 0 }}
-                className="flex-1 flex flex-col items-center justify-center text-center opacity-40 grayscale py-20"
-              >
+              <div className="flex-1 flex flex-col items-center justify-center text-center opacity-40 grayscale py-20 animate-fade-in">
                 <div className="relative mb-10">
                   <Utensils className="w-32 h-32 text-slate-200" />
                   <div className="absolute inset-x-0 bottom-0 h-4 bg-amber-500/10 blur-xl rounded-full" />
                 </div>
                 <h3 className="text-3xl font-serif italic text-slate-300">Escolha os itens da dispensa e filtros desejados.</h3>
-              </motion.div>
+              </div>
             )}
           </div>
         </main>
@@ -693,6 +694,13 @@ export default function App() {
         }
         .animate-wiggle {
           animation: wiggle 0.5s ease-in-out infinite;
+        }
+        @keyframes fadeIn {
+          from { opacity: 0; transform: translateY(4px); }
+          to { opacity: 1; transform: translateY(0); }
+        }
+        .animate-fade-in {
+          animation: fadeIn 0.2s cubic-bezier(0.16, 1, 0.3, 1) forwards;
         }
       `}</style>
     </div>

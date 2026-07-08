@@ -19,19 +19,33 @@ export const generateRecipe = async (
   ingredients: string[], 
   modelType: string,
   category: string = 'ambos',
-  dishType: string = 'todas'
+  dishType: string = 'todas',
+  isBaby: boolean = false,
+  babyAge: string = ''
 ): Promise<Recipe[]> => {
   const categoryFilter = category !== 'ambos' ? `O prato deve ser obrigatoriamente ${category}.` : '';
   const typeFilter = dishType !== 'todas' ? `O tipo de prato deve ser ${dishType}.` : 'Pode ser qualquer tipo de prato (pão, bolo, almoço, janta, etc).';
+  
+  let babyPromptSection = '';
+  if (isBaby) {
+    babyPromptSection = `
+- PÚBLICO-ALVO (MUITO IMPORTANTE): Esta receita é ESPECIFICA E EXCLUSIVAMENTE para um bebê de ${babyAge} de idade.
+- SEGURANÇA E TEXTURA: A receita deve ser perfeitamente segura para esta idade.
+  * Para 6-12 meses: Textura de papinha bem amassada, purê ou pedaços extremamente macios que se desfazem na boca (método BLW). Sem pedaços duros que possam causar engasgo.
+  * Para 12-24 meses: Textura picada fina ou pedaços macios e fáceis de mastigar.
+  * Para 2 anos+: Alimentos cortados de forma segura.
+- RESTRIÇÃO DE TEMPEROS E SUPLEMENTOS: NÃO adicione açúcar de nenhum tipo. Reduza ou elimine totalmente o sal (para menos de 1 ano, NENHUM sal adicionado; para acima de 1 ano, quantidade ínfima/opcional). Não utilize conservantes ou condimentos artificiais picantes.
+- Foque em uma alimentação infantil extremamente nutritiva, saudável e saborosa aproveitando o sabor natural dos alimentos.`;
+  }
 
   const prompt = `Você é um chef especialista internacional. 
 Seu objetivo é sugerir receitas usando EXATAMENTE e APENAS os ingredientes fornecidos pelo usuário.
-Não adicione ingredientes extras, exceto água ou sal se forem estritamente necessários para a estrutura básica.
+Não adicione ingredientes extras, exceto água se estritamente necessários para a estrutura básica.
 Priorize receitas que usem o máximo dos ingredientes fornecidos.
 
 Filtros solicitados:
 - Categoria: ${category} (doce/salgado). ${categoryFilter}
-- Tipo de Prato: ${dishType}. ${typeFilter}
+- Tipo de Prato: ${dishType}. ${typeFilter}${babyPromptSection}
 
 Importante: Identifique a origem cultural da receita (País e Região, se possível).
 
@@ -61,13 +75,11 @@ O JSON deve ser um array de objetos (ou um objeto contendo a propriedade "recipe
 Responda APENAS com o JSON válido, sem qualquer bloco de código markdown, markdown tags ou texto adicional.`;
 
   const modelsToTry = [
-    "openai/gpt-oss-120b:free",
     "qwen/qwen3-next-80b-a3b-instruct:free",
-    "deepseek/deepseek-v4-flash:free",
+    "nvidia/nemotron-3-ultra-550b-a55b:free",
     "openai/gpt-oss-120b:free",
-    "nvidia/nemotron-3-nano-30b-a3b:free",
     "google/gemma-4-31b-it:free",
-    "openai/gpt-oss-20b:free"
+    "meta-llama/llama-3.2-3b-instruct:free"
   ];
 
   const apiKey = getAPIKey();
