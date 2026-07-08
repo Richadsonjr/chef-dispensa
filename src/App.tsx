@@ -166,7 +166,7 @@ export default function App() {
     const isFav = isFavorite(recipe.title);
     return (
       <motion.div
-        key={recipe.id || idx}
+        key={recipe.id || recipe.title}
         initial={{ opacity: 0, y: 30 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ delay: idx * 0.1 }}
@@ -502,13 +502,13 @@ export default function App() {
 
           <div className="flex-1 flex flex-col gap-6 lg:gap-10">
             {viewMode === 'favorites' ? (
-              <div className="pb-10 lg:pb-0 animate-fade-in">
+              <div key="view-favorites" className="pb-10 lg:pb-0 animate-fade-in">
                 {filteredFavorites.length > 0 ? (
-                  <div className="grid grid-cols-1 gap-6 lg:gap-8">
+                  <div key="fav-grid" className="grid grid-cols-1 gap-6 lg:gap-8">
                     {filteredFavorites.map(renderRecipe)}
                   </div>
                 ) : (
-                  <div className="flex-1 flex flex-col items-center justify-center text-center opacity-40 grayscale py-20">
+                  <div key="fav-empty" className="flex-1 flex flex-col items-center justify-center text-center opacity-40 grayscale py-20">
                     <Bookmark className="w-24 h-24 text-slate-300 mb-6" />
                     <h3 className="text-2xl font-serif italic text-slate-400">
                       {favSearchQuery ? 'Nenhuma receita encontrada.' : 'Nenhuma receita favorita.'}
@@ -517,7 +517,7 @@ export default function App() {
                 )}
               </div>
             ) : loading ? (
-              <div className="flex-1 flex flex-col items-center justify-center text-center p-12 animate-fade-in">
+              <div key="view-loading" className="flex-1 flex flex-col items-center justify-center text-center p-12 animate-fade-in">
                 <div className="relative">
                   <div className="w-32 h-32 rounded-full border-4 border-amber-500/20 border-t-amber-500 animate-spin mb-8" />
                   <ChefHat className="w-12 h-12 text-amber-500 absolute top-10 left-10 animate-bounce" />
@@ -525,13 +525,13 @@ export default function App() {
                 <h3 className="text-2xl font-serif italic text-slate-400">O Chef está combinando sabores...</h3>
               </div>
             ) : recipes.length > 0 ? (
-              <div className="pb-10 lg:pb-0 animate-fade-in">
+              <div key="view-results" className="pb-10 lg:pb-0 animate-fade-in">
                 <div className="grid grid-cols-1 gap-6 lg:gap-8">
                   {recipes.map(renderRecipe)}
                 </div>
               </div>
             ) : error ? (
-              <div className="flex-1 flex flex-col items-center justify-center text-center py-20 px-4 animate-fade-in">
+              <div key="view-error" className="flex-1 flex flex-col items-center justify-center text-center py-20 px-4 animate-fade-in">
                 <div className="w-24 h-24 rounded-full bg-red-50 flex items-center justify-center text-red-500 mb-6">
                   <X className="w-12 h-12" />
                 </div>
@@ -539,7 +539,7 @@ export default function App() {
                 <p className="text-sm font-medium text-slate-500 max-w-md">{error}</p>
               </div>
             ) : (
-              <div className="flex-1 flex flex-col items-center justify-center text-center opacity-40 grayscale py-20 animate-fade-in">
+              <div key="view-empty" className="flex-1 flex flex-col items-center justify-center text-center opacity-40 grayscale py-20 animate-fade-in">
                 <div className="relative mb-10">
                   <Utensils className="w-32 h-32 text-slate-200" />
                   <div className="absolute inset-x-0 bottom-0 h-4 bg-amber-500/10 blur-xl rounded-full" />
