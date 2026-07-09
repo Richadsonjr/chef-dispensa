@@ -6,7 +6,7 @@ import { defineConfig, loadEnv } from 'vite';
 export default defineConfig(({ mode }) => {
   const env = loadEnv(mode, '.', '');
   return {
-    base: './', // Necessário para exportar e rodar no GitHub Pages sem depender do nome do repositório 
+    base: '/chef-dispensa/', // Definido para corresponder ao nome do repositório no GitHub Pages
     
     plugins: [react(), tailwindcss()],
     define: {
