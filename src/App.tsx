@@ -75,7 +75,12 @@ export default function App() {
     try {
       const ingredientNames = ingredients.map(i => i.name);
       const results = await generateRecipe(ingredientNames, model, category, dishType, isBaby, babyAge);
-      setRecipes(Array.isArray(results) ? results : (results ? [results] : []));
+      const arr = Array.isArray(results) ? results : (results ? [results] : []);
+      const withIds = arr.map((r, i) => ({
+        ...r,
+        id: r.id || `${Date.now()}-${i}-${Math.random().toString(36).slice(2, 8)}`,
+      }));
+      setRecipes(withIds);
     } catch (err: any) {
       console.error(err);
       setError(err?.message || 'Ocorreu um erro ao buscar a receita.');
@@ -166,7 +171,7 @@ export default function App() {
     const isFav = isFavorite(recipe.title);
     return (
       <motion.div
-        key={recipe.id || recipe.title}
+        key={recipe.id}
         initial={{ opacity: 0, y: 30 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ delay: idx * 0.1 }}
