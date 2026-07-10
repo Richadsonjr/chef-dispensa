@@ -252,12 +252,12 @@ export default function App() {
                        </p>
                      </li>
                    ))}
-                   {(recipe.instructions?.length || 0) > 4 && (
-                     <p className="text-[10px] text-slate-400 font-bold ml-10 lg:ml-13 uppercase tracking-widest italic cursor-pointer hover:text-amber-500" onClick={() => setSelectedRecipe(recipe)}>
-                       + Clique para ver {(recipe.instructions?.length || 0) - 4} passos restantes
-                     </p>
-                   )}
                  </ul>
+                 {(recipe.instructions?.length || 0) > 4 && (
+                   <p className="text-[10px] text-slate-400 font-bold ml-10 lg:ml-13 uppercase tracking-widest italic cursor-pointer hover:text-amber-500 mt-4 inline-block" onClick={() => setSelectedRecipe(recipe)}>
+                     {`+ Clique para ver ${(recipe.instructions?.length || 0) - 4} passos restantes`}
+                   </p>
+                 )}
                </div>
             </div>
 
@@ -393,7 +393,7 @@ export default function App() {
           <div className="flex-1 frosted-glass rounded-[1.5rem] lg:rounded-[2rem] p-5 lg:p-6 flex flex-col min-h-[250px] lg:min-h-[300px]">
             <div className="flex justify-between items-center mb-4 lg:mb-6">
               <label className="text-[10px] uppercase tracking-widest font-bold text-slate-500 block">Minha Dispensa</label>
-              <span className="text-[10px] font-black text-amber-600 bg-amber-50 px-2 py-0.5 rounded-lg">{ingredients.length} ITENS</span>
+              <span className="text-[10px] font-black text-amber-600 bg-amber-50 px-2 py-0.5 rounded-lg">{`${ingredients.length} ITENS`}</span>
             </div>
             
             <div className="flex gap-2 mb-4 lg:mb-6">
@@ -515,7 +515,7 @@ export default function App() {
           )}
 
           <div className="flex-1 flex flex-col gap-6 lg:gap-10">
-            {viewMode === 'favorites' ? (
+            {viewMode === 'favorites' && (
               <div key="view-favorites" className="pb-10 lg:pb-0 animate-fade-in">
                 {filteredFavorites.length > 0 ? (
                   <div key="fav-grid" className="grid grid-cols-1 gap-6 lg:gap-8">
@@ -530,7 +530,9 @@ export default function App() {
                   </div>
                 )}
               </div>
-            ) : loading ? (
+            )}
+
+            {viewMode === 'search' && loading && (
               <div key="view-loading" className="flex-1 flex flex-col items-center justify-center text-center p-12 animate-fade-in">
                 <div className="relative">
                   <div className="w-32 h-32 rounded-full border-4 border-amber-500/20 border-t-amber-500 animate-spin mb-8" />
@@ -538,13 +540,17 @@ export default function App() {
                 </div>
                 <h3 className="text-2xl font-serif italic text-slate-400">O Chef está combinando sabores...</h3>
               </div>
-            ) : recipes.length > 0 ? (
+            )}
+
+            {viewMode === 'search' && !loading && recipes.length > 0 && (
               <div key="view-results" className="pb-10 lg:pb-0 animate-fade-in">
                 <div className="grid grid-cols-1 gap-6 lg:gap-8">
                   {recipes.map(renderRecipe)}
                 </div>
               </div>
-            ) : error ? (
+            )}
+
+            {viewMode === 'search' && !loading && recipes.length === 0 && error && (
               <div key="view-error" className="flex-1 flex flex-col items-center justify-center text-center py-20 px-4 animate-fade-in">
                 <div className="w-24 h-24 rounded-full bg-red-50 flex items-center justify-center text-red-500 mb-6">
                   <X className="w-12 h-12" />
@@ -552,7 +558,9 @@ export default function App() {
                 <h3 className="text-2xl font-serif italic text-slate-800 mb-2">Ops! Algo deu errado.</h3>
                 <p className="text-sm font-medium text-slate-500 max-w-md">{error}</p>
               </div>
-            ) : (
+            )}
+
+            {viewMode === 'search' && !loading && recipes.length === 0 && !error && (
               <div key="view-empty" className="flex-1 flex flex-col items-center justify-center text-center opacity-40 grayscale py-20 animate-fade-in">
                 <div className="relative mb-10">
                   <Utensils className="w-32 h-32 text-slate-200" />
